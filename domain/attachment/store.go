@@ -12,6 +12,7 @@
 package attachment
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -27,6 +28,7 @@ import (
 type Store struct {
 	store.Context
 	store.AttachmentStorer
+	Objects ObjectStorer
 }
 
 // Add inserts the given record into the database attachment table.
@@ -39,8 +41,17 @@ func (s Store) Add(ctx domain.RequestContext, a attachment.Attachment) (err erro
 		a.Extension = bits[len(bits)-1]
 	}
 
+	putCtx, cancel := context.WithTimeout(context.TODO(), 5*time.Minute)
+	defer cancel()
+
+	err = s.Objects.Put(putCtx, ctx, a, a.Data)
+	if err != nil {
+		err = errors.Wrap(err, "put attachment data")
+		return
+	}
+
 	_, err = ctx.Transaction.Exec(s.Bind("INSERT INTO dmz_doc_attachment (c_refid, c_orgid, c_docid, c_sectionid, c_job, c_fileid, c_filename, c_data, c_extension, c_created, c_revised) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"),
-		a.RefID, a.OrgID, a.DocumentID, a.SectionID, a.Job, a.FileID, a.Filename, a.Data, a.Extension, a.Created, a.Revised)
+		a.RefID, a.OrgID, a.DocumentID, a.SectionID, a.Job, a.FileID, a.Filename, []byte{}, a.Extension, a.Created, a.Revised)
 
 	if err != nil {
 		err = errors.Wrap(err, "execute insert attachment")
@@ -62,6 +73,16 @@ func (s Store) GetAttachment(ctx domain.RequestContext, orgID, attachmentID stri
 
 	if err != nil {
 		err = errors.Wrap(err, "execute select attachment")
+		return
+	}
+
+	getCtx, cancel := context.WithTimeout(context.TODO(), 5*time.Minute)
+	defer cancel()
+
+	a.Data, err = s.Objects.Get(getCtx, ctx, a)
+	if err != nil {
+		err = errors.Wrap(err, "get attachment data")
+		return
 	}
 
 	return

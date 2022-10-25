@@ -23,6 +23,8 @@ type Flags struct {
 	SSLKeyFile        string // (optional) name of SSL key PEM file
 	TLSVersion        string // (optional) minimum TLS version for SSL connections
 	SiteMode          string // (optional) if 1 then serve offline web page
+	Bucket            string // (optional) object storage bucket, defaults to community
+	MinioEndpoint     string // (optional) if set then use this Minio instance, otherwise S3
 	Location          string // reserved
 	ConfigSource      string // tells us if configuration info was obtained from command line or config file
 }

@@ -38,6 +38,10 @@ func LoadConfig() (f Flags, ok bool) {
 		f.Location = "selfhost"
 	}
 
+	if len(f.Bucket) == 0 {
+		f.Bucket = "community"
+	}
+
 	return
 }
 
@@ -98,7 +102,7 @@ func configFile() (f Flags, ok bool) {
 // commandLineEnv loads command line and OS environment variables required by the program to function.
 func commandLineEnv() (f Flags, ok bool) {
 	ok = true
-	var dbConn, dbType, jwtKey, siteMode, port, certFile, keyFile, forcePort2SSL, TLSVersion, location string
+	var dbConn, dbType, jwtKey, siteMode, port, certFile, keyFile, forcePort2SSL, TLSVersion, bucket, minioEndpoint, location string
 
 	// register(&configFile, "salt", false, "the salt string used to encode JWT tokens, if not set a random value will be generated")
 	register(&jwtKey, "salt", false, "the salt string used to encode JWT tokens, if not set a random value will be generated")
@@ -110,6 +114,8 @@ func commandLineEnv() (f Flags, ok bool) {
 	register(&siteMode, "offline", false, "set to '1' for OFFLINE mode")
 	register(&dbType, "dbtype", true, "specify the database provider: mysql|percona|mariadb|postgresql|sqlserver")
 	register(&dbConn, "db", true, `'database specific connection string for example "user:password@tcp(localhost:3306)/dbname"`)
+	register(&bucket, "bucket", false, `object storage bucket, defaults to "community"`)
+	register(&minioEndpoint, "minio", false, `specify to use minio instead of S3, for example "http://id:secret@minio:9000"`)
 	register(&location, "location", false, `reserved`)
 
 	if !parse("db") {
@@ -125,6 +131,8 @@ func commandLineEnv() (f Flags, ok bool) {
 	f.SSLCertFile = certFile
 	f.SSLKeyFile = keyFile
 	f.TLSVersion = TLSVersion
+	f.Bucket = bucket
+	f.MinioEndpoint = minioEndpoint
 	f.Location = strings.ToLower(location)
 	f.ConfigSource = "flags/environment"
 

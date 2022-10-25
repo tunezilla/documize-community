@@ -27,6 +27,18 @@ services:
     networks:
        - documizenet
 
+  minio:
+    image: minio/minio
+    volumes:
+      - minio-data:/data
+    environment:
+      - MINIO_ACCESS_KEY=documize-id
+      - MINIO_SECRET_KEY=documize-secret
+    entrypoint: sh
+    command: -c 'mkdir -p /data/community && minio server /data'
+    networks:
+       - documizenet
+
   app:
     image: ghcr.io/tunezilla/documize-community
     build: .
@@ -40,11 +52,13 @@ services:
       DOCUMIZEDBTYPE: postgresql
       DOCUMIZESALT: hsk3Acndky8cdTNx3
       DOCUMIZELOCATION: selfhost
+      DOCUMIZEMINIO: http://documize-id:documize-secret@minio:9000
     networks:
       - documizenet
 
 volumes:
   db-data:
+  minio-data:
 
 networks:
   documizenet:

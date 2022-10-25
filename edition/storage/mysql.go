@@ -75,6 +75,7 @@ func SetMySQLProvider(r *env.Runtime, s *store.Store) {
 	// Attachment
 	attachmentStore := attachment.Store{}
 	attachmentStore.Runtime = r
+	attachmentStore.Objects = objectStorer(r)
 	s.Attachment = attachmentStore
 
 	// Audit
