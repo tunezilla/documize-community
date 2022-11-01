@@ -67,7 +67,7 @@ module.exports = function (environment) {
 			enabled: false
 		};
 
-		ENV.apiHost = "https://localhost:5001";
+		ENV.apiHost = "http://localhost:5001";
 		ENV.apiNamespace = "api";
 	}
 
@@ -87,7 +87,7 @@ module.exports = function (environment) {
 
 		ENV.APP.autoboot = false;
 
-		ENV.apiHost = "https://localhost:5001";
+		ENV.apiHost = "http://localhost:5001";
 	}
 
 	if (environment === 'production') {
