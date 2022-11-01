@@ -138,7 +138,8 @@ export default Service.extend({
 		return this.get('ajax').request(`public/meta/themes`, {
 			method: 'GET'
 		}).then((response) => {
-			return response;
+			// TODO: Register/build with TZ theme in domain/meta/endpoint.go Themes request
+			return [ ...response, { name: 'TuneZilla', primary: '#2744f6' } ];
 		});
 	}
 });

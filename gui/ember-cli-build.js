@@ -33,6 +33,7 @@ module.exports = function(defaults) {
 					'themes/harvest': '/assets/theme-harvest.css',
 					'themes/sunflower': '/assets/theme-sunflower.css',
 					'themes/silver': '/assets/theme-silver.css',
+					'themes/tunezilla': '/assets/theme-tunezilla.css',
 				}
 			}
 		},
