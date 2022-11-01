@@ -1,0 +1,27 @@
+@import "../colors.scss";
+
+/**************************************************************
+* Theme colors.
+*
+* We go from 100 (lightest) to 900 (darkest).
+*
+* Base shade is 500 and is used prominently as the
+* left-side navigation sidebar color.
+**************************************************************/
+$theme-900: scale-color($primary-color, $lightness: -80%);
+$theme-800: scale-color($primary-color, $lightness: -60%);
+$theme-700: scale-color($primary-color, $lightness: -40%);
+$theme-600: scale-color($primary-color, $lightness: -20%);
+$theme-500: $primary-color;
+$theme-400: scale-color($primary-color, $lightness: 20%);
+$theme-300: scale-color($primary-color, $lightness: 40%);
+$theme-200: scale-color($primary-color, $lightness: 60%);
+$theme-100: scale-color($primary-color, $lightness: 80%);
+
+// Set hyperlink color for theme
+// $color-link: map-get($green-shades, 700);
+$color-link: $primary-color;
+$color-link-hover: scale-color($primary-color, $lightness: 20%);
+
+@import "../core/all.scss";
+@import "../app-override.scss";

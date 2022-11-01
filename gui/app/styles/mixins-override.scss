@@ -1,0 +1,12 @@
+// Import at end of core/mixins.scss
+
+@mixin card() {
+	background-color: $light-bg;
+  box-shadow: none;
+  border: 1px solid $secondary-color;
+  border-radius: 0.25rem !important;
+
+	&:hover {
+		background-color: $secondary-color;
+	}
+}

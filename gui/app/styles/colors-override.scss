@@ -1,0 +1,108 @@
+// Import at end of colors.scss
+
+// TZ-components colors start
+
+$white: #ffffff !default;
+$off-white: #eff2f9 !default;
+$light-grey: #d1d5da !default;
+$med-grey: #6a737d !default;
+$dark-grey: #35424e !default;
+$black: #000000 !default;
+
+$dark-bg: #02133F !default;
+$light-bg: #F6F7FF !default;
+
+$primary-color: #2744f6 !default;
+$secondary-color: #dae0fe !default;
+$accent-color: #5433ff !default;
+$info-color: #0779e4 !default;
+$success-color: #02b875 !default;
+$warning-color: #ff9f43 !default;
+$danger-color: #ed1250  !default;
+
+$body-bg: $white !default;
+$body-color: $dark-grey !default;
+
+// TZ-components colors end
+
+/**************************************************************
+* Overrides
+**************************************************************/
+
+$color-sidebar: $light-bg;
+
+// Various blacks and gray shades are around the app for styling text
+// colors. Modify them so we have consistent text coloring.
+/**************************************************************
+* Black to lighter shades
+**************************************************************/
+$color-black: #000000;
+$color-black-light-1: $body-color;
+$color-black-light-2: $body-color;
+$color-black-light-3: $body-color;
+
+.color-black { color: $color-black; }
+.color-black-light-1 { color: $color-black-light-1; }
+.color-black-light-2 { color: $color-black-light-2; }
+.color-black-light-3 { color: $color-black-light-3; }
+.background-color-black { background-color: $color-black; }
+.background-color-black-light-1 { background-color: $color-black-light-1; }
+.background-color-black-light-2 { background-color: $color-black-light-2; }
+.background-color-black-light-3 { background-color: $color-black-light-3; }
+
+// Various blacks and gray shades are around the app for styling text
+// colors. Modify them so we have consistent text coloring.
+/**************************************************************
+* Gray shades
+**************************************************************/
+$gray-shades: (
+	900: $body-color,
+	800: $body-color,
+	700: $body-color,
+	600: #929FB1,
+	500: #AEBECC,
+	400: #CBD4DB,
+	300: #D5DDE5,
+	200: #E1E7EB,
+	100: #F8F9FA
+);
+
+// Generate handy classes for text color and background color.
+$i: 900;
+@while $i > 0 {
+	.color-gray-#{$i} {
+		color: map-get($gray-shades, $i);
+	}
+	.background-color-gray-#{$i} {
+		background-color: map-get($gray-shades, $i);
+	}
+	$i: $i - 100;
+}
+
+// Yellow Shade is used throughout the app more like a primary color for action buttons and
+// selected content, switching yellow -> blue is the simplest way to fix this
+/**************************************************************
+* Information color ("yellow") shades
+**************************************************************/
+$yellow-shades: (
+	900: scale-color($primary-color, $lightness: -80%),
+	800: scale-color($primary-color, $lightness: -60%),
+	700: scale-color($primary-color, $lightness: -40%),
+	600: scale-color($primary-color, $lightness: -20%),
+	500: $primary-color,
+	400: scale-color($primary-color, $lightness: 20%),
+	300: scale-color($primary-color, $lightness: 40%),
+	200: scale-color($primary-color, $lightness: 60%),
+	100: scale-color($primary-color, $lightness: 80%),
+);
+
+$i: 900;
+@while $i > 0 {
+	.color-yellow-#{$i} {
+		color: map-get($yellow-shades, $i);
+	}
+	.background-color-yellow-#{$i} {
+		background-color: map-get($yellow-shades, $i);
+	}
+	$i: $i - 100;
+}

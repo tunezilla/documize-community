@@ -1,0 +1,321 @@
+// Imported in themes/tunezilla.scss
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&display=swap');
+
+body {
+  font-family: 'Open Sans', sans-serif !important;
+  color: $body-color;
+}
+
+// *****************************************************************
+// Button Overrides
+// *****************************************************************
+
+.btn-base {
+  text-decoration: none;
+  font-family: inherit;
+  text-transform: uppercase;
+  border: none;
+  font-weight: 400;
+  border-radius: 0.25rem;
+  box-shadow: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 300ms ease-in;
+  &:hover {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 15px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+  }
+}
+
+.dmz-button-green, .dmz-button-green-light,
+.dmz-button-yellow, .dmz-button-yellow-light,
+.dmz-button-red, .dmz-button-red-light,
+.dmz-button-gray, .dmz-button-gray-light, .dmz-button-gray-outline,
+.dmz-button-theme, .dmz-button-theme-light {
+  @extend .btn-base;
+  i {
+    // override padding-top was used to for centering
+    padding: 4px 0.5rem 0 0 !important;
+  }
+}
+
+.dmz-button-green, .dmz-button-green-light {
+  color: $white;
+  background-color: $success-color;
+  &:hover {
+    background-color: $success-color;
+  }
+}
+
+.dmz-button-yellow, .dmz-button-yellow-light,
+.dmz-button-theme, .dmz-button-theme-light {
+  color: $white;
+  background-color: $primary-color;
+  &:hover {
+    background-color: $primary-color;
+  }
+}
+
+.dmz-button-red, .dmz-button-red-light {
+  color: $white;
+  background-color: $danger-color;
+  &:hover {
+    background-color: $danger-color;
+  }
+}
+
+.dmz-button-gray, .dmz-button-gray-light, .dmz-button-gray-outline {
+  color: $white;
+  background-color: $body-color;
+  &:hover {
+    background-color: $body-color;
+  }
+}
+
+// *****************************************************************
+// Input Overrides
+// *****************************************************************
+
+.form-control {
+  min-height: 48px;
+  color: $body-color;
+  background-color: $white;
+  border: 1px solid $secondary-color;
+  border-radius: 0.25rem;
+  box-shadow: none;
+  // remove inner shadow in iOS safari
+  background-clip: padding-box;
+  padding: 0.75rem 1rem;
+  transition: all 250ms ease-in-out;
+  &:focus {
+    border-color: $primary-color;
+    box-shadow: none;
+    outline: none;
+  }
+  &:disabled {
+    background-color: $light-grey;
+    opacity: 0.5;
+  }
+  &::placeholder {
+    color: $med-grey;
+  }
+}
+select.form-control {
+  padding-right: 2rem;
+
+  appearance: none;
+  // add our own caret for the dropdown
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="292.4" height="292.4"><path fill="%23dae0fe" d="M287 69.4a17.6 17.6 0 0 0-13-5.4H18.4c-5 0-9.3 1.8-12.9 5.4A17.6 17.6 0 0 0 0 82.2c0 5 1.8 9.3 5.4 12.9l128 127.9c3.6 3.6 7.8 5.4 12.8 5.4s9.2-1.8 12.8-5.4L287 95c3.5-3.5 5.4-7.8 5.4-12.8 0-5-1.9-9.2-5.5-12.8z" /></svg>');
+  background-repeat: no-repeat, repeat;
+  background-position: right .7rem top 50%, 0 0;
+  background-size: .65rem auto, 100%;
+}
+
+// *****************************************************************
+// layout.scss Overrides
+// *****************************************************************
+
+.master-grid-container {
+	.master-sidebar {
+    background-color: $color-sidebar;
+		margin: 0;
+	}
+}
+
+// Tablet starts around 700px
+@media (min-width: $display-break-1) {
+	.master-grid-container {
+		.master-sidebar {
+			margin: 0;
+			height: 100vh;
+		}
+	}
+}
+
+// Medium screen starts around 1200px
+@media (min-width: $display-break-3) and (min-height: 650px) {
+	.master-grid-container {
+		.master-sidebar {
+			margin: 0;
+			height: 100vh;
+		}
+	}
+}
+
+// Large screen starts around 1600px
+@media (min-width: $display-break-4) and (min-height: 650px) {
+	.master-grid-container {
+		.master-sidebar {
+			width: 400px;
+			margin: 0;
+		}
+	}
+}
+
+// *****************************************************************
+// Define mobile-first layout for content without a sidebar.
+// *****************************************************************
+.master-container {
+	display: block;
+	height: auto;
+	width: 100%;
+	padding: 20px;
+}
+
+// Tablet starts around 700px
+@media (min-width: $display-break-1) {
+	.master-container {
+		padding: 20px;
+	}
+}
+
+// Small screen starts around 900px
+@media (min-width: $display-break-2) and (min-height: 650px) {
+	.master-container {
+		padding: 20px;
+	}
+}
+
+// Medium screen starts around 1200px
+@media (min-width: $display-break-3) and (min-height: 650px) {
+	.master-container {
+		padding: 30px;
+	}
+}
+
+// Large screen starts around 1600px
+@media (min-width: $display-break-4) and (min-height: 650px) {
+	.master-container {
+		padding: 40px;
+		// max-width: 1200px;
+	}
+}
+
+.sidebar-content {
+  border-radius: 0;
+}
+
+// *****************************************************************
+// Navbar Overrides
+// *****************************************************************
+.master-navigation {
+  > .navbar {
+    background-color: $dark-bg;
+    > .container {
+      .dicon, a.option {
+        color: $white !important;
+        &:hover {
+          color: $white !important;
+        }
+      }
+      > .invalid-plan {
+        > .dicon {
+          color: $white !important;
+        }
+      }
+      // Megaphone icon in top right
+      > .options > .invalid-plan > .dicon {
+        color: $white !important;
+      }
+    }
+  }
+  > .toolbar {
+    background-color: $white;
+    border-bottom: 1px solid $secondary-color;
+    .zone-1, .zone-3 {
+      button {
+        // Icon on toolbar buttons is not center aligned by default
+        display: flex;
+        align-items: center;
+        i {
+          // override padding-top which was used to attempt centering
+          padding: 0 0.5rem 0 0;
+        }
+        &:hover {
+          background-color: $primary-color;
+        }
+      }
+    }
+    .zone-3 {
+      .dicon-settings-gear {
+        color: $body-color;
+      }
+      .button-green {
+        background-color: $primary-color;
+      }
+    }
+  }
+}
+
+.dmz-toolbar {
+  .button-green, .button-green-light,
+  .button-yellow, .button-yellow-light,
+  .button-red, .button-red-light, .button-theme {
+    @extend .btn-base;
+  }
+}
+
+// *****************************************************************
+// Home Page List Items Overrides
+// *****************************************************************
+
+.view-spaces {
+	> .list {
+    > .item {
+      > .info {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        color: $body-color;
+        > .desc {
+          flex: 1;
+        }
+        > a {
+          > .name {
+            font-weight: 600;
+            color: $body-color;
+            > .icon {
+              color: $dark-bg;
+            }
+          }
+        }
+      }
+      > a > .stats > .stat {
+        > .number, > .label {
+          color: $body-color !important;
+        }
+      }
+      // stats were take up to much space on larger breakpoints
+      @media (min-width: $display-break-2) {
+        grid-template-columns: 8fr 1fr;
+      }
+    }
+	}
+  .space-label {
+    margin: 0 !important;
+  }
+}
+
+// *****************************************************************
+// Page Heading Overrides
+// *****************************************************************
+
+.master-page-heading {
+	font-size: 48px;
+	font-weight: 600;
+	color: $body-color;
+  margin: 0;
+}
+
+.master-page-desc {
+	font-size: 1.2rem;
+	font-weight: 400;
+	color: $body-color;
+}
+
+.logo-heading {
+	> .icon, > .meta-icon, > .meta-logo {
+		> i {
+			color: $dark-bg;
+		}
+	}
+}
