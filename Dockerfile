@@ -1,4 +1,5 @@
-FROM node:lts-alpine as frontbuilder
+# fails to build on node 17+, ERR_OSSL_EVP_UNSUPPORTED
+FROM node:16-alpine as frontbuilder
 WORKDIR /go/src/github.com/documize/community/gui
 COPY ./gui /go/src/github.com/documize/community/gui
 RUN npm --network-timeout=100000 install
