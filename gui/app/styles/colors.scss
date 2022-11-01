@@ -182,3 +182,5 @@ $theme-100: #FBF7FE;
 // $color-link: map-get($green-shades, 700);
 $color-link: #0080a5;
 $color-link-hover: #0fb4e2;
+
+@import "colors-override.scss";

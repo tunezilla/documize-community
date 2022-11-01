@@ -228,6 +228,7 @@ func (h *Handler) Themes(w http.ResponseWriter, r *http.Request) {
 	th = append(th, theme{Name: "Harvest", Primary: "#A65F20"})
 	th = append(th, theme{Name: "Silver", Primary: "#AEBECC"})
 	th = append(th, theme{Name: "Sunflower", Primary: "#D7B92F"})
+	th = append(th, theme{Name: "TuneZilla", Primary: "#2744f6"})
 
 	response.WriteJSON(w, th)
 }
