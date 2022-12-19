@@ -14,6 +14,7 @@ package boot
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/documize/community/core/database"
@@ -79,8 +80,24 @@ func InitRuntime(r *env.Runtime, s *store.Store) bool {
 	r.Db = db
 
 	// Set connection defaults.
-	r.Db.SetMaxIdleConns(30)
-	r.Db.SetMaxOpenConns(100)
+	maxIdleConns, err := strconv.Atoi(r.Flags.DBMaxIdleConns)
+	if err != nil {
+		r.Log.Error("Unable to parse DBMaxIdleConns", err)
+		r.Log.Info(r.Flags.DBMaxIdleConns)
+		os.Exit(1)
+		return false
+	}
+	r.Db.SetMaxIdleConns(maxIdleConns)
+
+	maxOpenConns, err := strconv.Atoi(r.Flags.DBMaxOpenConns)
+	if err != nil {
+		r.Log.Error("Unable to parse DBMaxOpenConns", err)
+		r.Log.Info(r.Flags.DBMaxOpenConns)
+		os.Exit(1)
+		return false
+	}
+	r.Db.SetMaxOpenConns(maxOpenConns)
+
 	r.Db.SetConnMaxLifetime(time.Second * 14400)
 
 	// Ping verifies a connection to the database is still alive, establishing a connection if necessary.

@@ -53,6 +53,8 @@ services:
       DOCUMIZESALT: hsk3Acndky8cdTNx3
       DOCUMIZELOCATION: selfhost
       DOCUMIZEMINIO: http://documize-id:documize-secret@minio:9000
+      DOCUMIZEDBMAXOPENCONNS: 5
+      DOCUMIZEDBMAXIDLECONNS: 1
     networks:
       - documizenet
 

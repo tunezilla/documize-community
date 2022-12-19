@@ -16,6 +16,8 @@ package env
 type Flags struct {
 	DBType            string // database type
 	DBConn            string // database connection string
+	DBMaxIdleConns    string // (optional) database max idle connections, default 30
+	DBMaxOpenConns    string // (optional) database max open connections, default 100
 	Salt              string // the salt string used to encode JWT tokens
 	HTTPPort          string // (optional) HTTP or HTTPS port
 	ForceHTTPPort2SSL string // (optional) HTTP that should be redirected to HTTPS

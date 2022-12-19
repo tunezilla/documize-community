@@ -102,7 +102,7 @@ func configFile() (f Flags, ok bool) {
 // commandLineEnv loads command line and OS environment variables required by the program to function.
 func commandLineEnv() (f Flags, ok bool) {
 	ok = true
-	var dbConn, dbType, jwtKey, siteMode, port, certFile, keyFile, forcePort2SSL, TLSVersion, bucket, minioEndpoint, location string
+	var dbConn, dbType, dbMaxIdleConns, dbMaxOpenConns, jwtKey, siteMode, port, certFile, keyFile, forcePort2SSL, TLSVersion, bucket, minioEndpoint, location string
 
 	// register(&configFile, "salt", false, "the salt string used to encode JWT tokens, if not set a random value will be generated")
 	register(&jwtKey, "salt", false, "the salt string used to encode JWT tokens, if not set a random value will be generated")
@@ -114,6 +114,8 @@ func commandLineEnv() (f Flags, ok bool) {
 	register(&siteMode, "offline", false, "set to '1' for OFFLINE mode")
 	register(&dbType, "dbtype", true, "specify the database provider: mysql|percona|mariadb|postgresql|sqlserver")
 	register(&dbConn, "db", true, `'database specific connection string for example "user:password@tcp(localhost:3306)/dbname"`)
+	register(&dbMaxIdleConns, "dbmaxidleconns", false, `maximum idle connections`)
+	register(&dbMaxOpenConns, "dbmaxopenconns", false, `maximum open connections`)
 	register(&bucket, "bucket", false, `object storage bucket, defaults to "community"`)
 	register(&minioEndpoint, "minio", false, `specify to use minio instead of S3, for example "http://id:secret@minio:9000"`)
 	register(&location, "location", false, `reserved`)
@@ -124,6 +126,8 @@ func commandLineEnv() (f Flags, ok bool) {
 
 	f.DBType = strings.ToLower(dbType)
 	f.DBConn = dbConn
+	f.DBMaxIdleConns = dbMaxIdleConns
+	f.DBMaxOpenConns = dbMaxOpenConns
 	f.ForceHTTPPort2SSL = forcePort2SSL
 	f.HTTPPort = port
 	f.Salt = jwtKey
@@ -138,6 +142,14 @@ func commandLineEnv() (f Flags, ok bool) {
 
 	if len(f.TLSVersion) == 0 {
 		f.TLSVersion = "1.2"
+	}
+
+	if len(f.DBMaxIdleConns) == 0 {
+		f.DBMaxIdleConns = "30"
+	}
+
+	if len(f.DBMaxOpenConns) == 0 {
+		f.DBMaxOpenConns = "100"
 	}
 
 	return f, ok
