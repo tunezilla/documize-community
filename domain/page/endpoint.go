@@ -1206,6 +1206,10 @@ func (h *Handler) GetDiff(w http.ResponseWriter, r *http.Request) {
 		res = []string{previousHTML}
 	}
 
+	if res[0] == "" {
+		res[0] = "(content unknown)"
+	}
+
 	result = []byte(res[0])
 	w.Write(result)
 }
