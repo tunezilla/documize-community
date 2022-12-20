@@ -464,6 +464,7 @@ func (h *Handler) Use(w http.ResponseWriter, r *http.Request) {
 	nd, err := h.Store.Document.Get(ctx, documentID)
 	if err != nil {
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 

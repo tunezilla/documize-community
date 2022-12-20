@@ -531,6 +531,7 @@ func (h *Handler) SetCategoryPermissions(w http.ResponseWriter, r *http.Request)
 		if err != nil {
 			ctx.Transaction.Rollback()
 			response.WriteServerError(w, method, err)
+			h.Runtime.Log.Error(method, err)
 			return
 		}
 	}
@@ -556,6 +557,7 @@ func (h *Handler) GetDocumentPermissions(w http.ResponseWriter, r *http.Request)
 	perms, err := h.Store.Permission.GetDocumentPermissions(ctx, documentID)
 	if err != nil && err != sql.ErrNoRows {
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 
@@ -586,6 +588,7 @@ func (h *Handler) GetUserDocumentPermissions(w http.ResponseWriter, r *http.Requ
 	perms, err := h.Store.Permission.GetUserDocumentPermissions(ctx, documentID)
 	if err != nil && err != sql.ErrNoRows {
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 

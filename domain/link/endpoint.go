@@ -180,6 +180,7 @@ func (h *Handler) GetLink(w http.ResponseWriter, r *http.Request) {
 	link, err := h.Store.Link.GetLink(ctx, linkID)
 	if err != nil {
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 

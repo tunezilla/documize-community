@@ -1201,6 +1201,7 @@ func (h *Handler) GetDiff(w http.ResponseWriter, r *http.Request) {
 	res, err := cfg.HTMLdiff([]string{previousHTML, latestHTML})
 	if err != nil {
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 
@@ -1385,6 +1386,7 @@ func (h *Handler) FetchPages(w http.ResponseWriter, r *http.Request) {
 	perms, err := h.Store.Permission.GetUserSpacePermissions(ctx, doc.SpaceID)
 	if err != nil && err != sql.ErrNoRows {
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 	if len(perms) == 0 {
@@ -1395,6 +1397,7 @@ func (h *Handler) FetchPages(w http.ResponseWriter, r *http.Request) {
 	roles, err := h.Store.Permission.GetUserDocumentPermissions(ctx, doc.RefID)
 	if err != nil && err != sql.ErrNoRows {
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 	if len(roles) == 0 {

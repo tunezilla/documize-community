@@ -696,6 +696,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.Runtime.Rollback(ctx.Transaction)
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 
@@ -712,6 +713,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.Runtime.Rollback(ctx.Transaction)
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 
@@ -719,6 +721,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.Runtime.Rollback(ctx.Transaction)
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 
@@ -726,6 +729,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.Runtime.Rollback(ctx.Transaction)
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 
@@ -733,6 +737,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.Runtime.Rollback(ctx.Transaction)
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 
@@ -740,6 +745,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil && err != sql.ErrNoRows {
 		h.Runtime.Rollback(ctx.Transaction)
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 

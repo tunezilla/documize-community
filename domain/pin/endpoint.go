@@ -101,6 +101,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 	newPin, err := h.Store.Pin.GetPin(ctx, pin.RefID)
 	if err != nil {
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 

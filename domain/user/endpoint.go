@@ -558,6 +558,7 @@ func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	ctx.Transaction, err = h.Runtime.Db.Beginx()
 	if err != nil {
 		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error(method, err)
 		return
 	}
 
