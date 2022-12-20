@@ -45,9 +45,9 @@ export default Component.extend(Modals, {
 			this.set('enableLogout', !config.disableLogout);
 		}
 
-		this.get('session').hasWhatsNew().then((v) => {
-			this.set('hasWhatsNew', v);
-		});
+		// this.get('session').hasWhatsNew().then((v) => {
+		// 	this.set('hasWhatsNew', v);
+		// });
 
 		let version = this.get('appMeta.version');
 		let edition = encodeURIComponent(this.get('appMeta.edition').toLowerCase());
