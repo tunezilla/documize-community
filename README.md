@@ -1,105 +1,34 @@
-Documize Community is an open source, self-hosted, modern, lightweight alternative to Confluence and other similar solutions.
+# Documize Community Fork
 
-- Built for technical and non-technical users
-- Designed to unify both customer-facing and internal documentation
-- Organization through labels, spaces and categories
+For the original repository, see https://github.com/documize/community
 
-It's built with Golang + EmberJS and compiled down to a single executable binary that is available for Linux, Windows and Mac.
+## Changes
 
-All you need to provide is your database -- PostgreSQL, Microsoft SQL Server or any MySQL variant.
+### Attachments get dumped to object storage
 
-![Documize Community](https://github.com/documize/community/blob/master/screenshot.png?raw=true)
+See [09931004](https://github.com/tunezilla/documize-community/commit/09931004e8b3786ef37c0fbfccc114d56f9271ea)
 
-## Latest Release
+To configure:
 
-[Community edition: v5.4.2](https://github.com/documize/community/releases)
+- Set `DOCUMIZEBUCKET=some-bucket-here`
+- If using Minio, set `DOCUMIZEMINIO=http://id:secret@minio:9000`
+- Otherwise, your AWS S3 config will be pulled from [default locations](https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)
 
-[Community+ edition: v5.4.2](https://www.documize.com/community/get-started)
+### More DB options
 
-The Community+ edition is the "enterprise" offering with advanced capabilities and customer support:
+See [e81d81](https://github.com/tunezilla/documize-community/commit/e81d81be09e24969909be4cefa023c70f422f2d2), [49e77c](49e77c60aaaa74b4bc4905b0cd72b0dea9e2e97a)
 
-- content approval workflows
-- content organization by label, space and category
-- content version management
-- content lifecycle management
-- content feedback capture
-- content PDF export
-- analytics and reporting
-- activity streams
-- audit logs
-- actions assignments
-- product support
+| Env Var                   | Func               | Default       |
+|---------------------------|--------------------|---------------|
+| DOCUMIZEDBMAXIDLECONNS    | [SetMaxIdleConns](https://pkg.go.dev/database/sql#DB.SetMaxIdleConns)    | 30            |
+| DOCUMIZEDBMAXOPENCONNS    | [SetMaxOpenConns](https://pkg.go.dev/database/sql#DB.SetMaxOpenConns)    | 100           |
+| DOCUMIZEDBCONNMAXLIFETIME | [SetConnMaxLifetime](https://pkg.go.dev/database/sql#DB.SetConnMaxLifetime) | 14400         |
+| DOCUMIZEDBCONNMAXIDLETIME | [SetConnMaxIdleTime](https://pkg.go.dev/database/sql#DB.SetConnMaxIdleTime) | 0 (unlimited) |
 
-The Community+ edition is [free](https://www.documize.com/community/get-started) for the first five users -- thereafter pricing starts at just $900 annually for 100 users.
+### Stuff is stubbed
 
-## OS Support
+We [stop checking for changelogs and news](https://github.com/tunezilla/documize-community/commit/f2cdc751d4a6d65a87f0a2f5f7f621c3b447831f) and [don't care about the "What's New" dot](https://github.com/tunezilla/documize-community/commit/6c1e51ee346578dd5f200916f7c6b657699d209d)
 
-- Linux
-- Windows
-- macOS
-- Raspberry Pi (ARM build)
+### Page loader
 
-Support for AMD and ARM 64 bit architectures.
-
-## Database Support
-
-For all database types, Full-Text Search support (FTS) is mandatory.
-
-- PostgreSQL (v9.6+)
-- Microsoft SQL Server (2016+ with FTS)
-- MySQL (v5.7.10+ and v8.0.12+)
-- Percona (v5.7.16-10+)
-- MariaDB (10.3.0+)
-
-## Browser Support
-
-- Firefox
-- Chrome
-- Safari
-- Microsoft Edge (v42+)
-- Brave
-- Vivaldi
-- Opera
-
-## Technology Stack
-
-- Go (v1.19.2)
-- Ember JS (v3.12.0)
-
-## Authentication Options
-
-Besides email/password login, you can also authenticate via:
-
-* LDAP
-* Active Directory
-* Red Hat Keycloak
-* Central Authentication Service (CAS)
-
-When using LDAP/Active Directory, you can enable dual-authentication with email/password.
-
-## Localization
-
-Languages supported out-of-the-box:
-
-- English
-- German
-- Chinese (中文)
-- Portuguese (Brazil) (Português - Brasil)
-
-PR's welcome for additional languages.
-
-## Product/Technical Support
-
-For both Community and Community+ editions, please contact our help desk for product help, suggestions and other enquiries.
-
-<support@documize.com>
-
-We aim to respond within two working days.
-
-## The Legal Bit
-
-<https://www.documize.com>
-
-This software (Documize Community Edition) is licensed under GNU AGPL v3 <http://www.gnu.org/licenses/agpl-3.0.en.html>.
-
-Documize uses other open source components and we acknowledge them in [NOTICES](NOTICES.md)
+[A progress bar shows between page loads](https://github.com/tunezilla/documize-community/commit/4e785287348e4684fd594eb76340b8c01a24cbd8)
