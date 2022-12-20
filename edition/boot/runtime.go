@@ -98,7 +98,23 @@ func InitRuntime(r *env.Runtime, s *store.Store) bool {
 	}
 	r.Db.SetMaxOpenConns(maxOpenConns)
 
-	r.Db.SetConnMaxLifetime(time.Second * 14400)
+	connMaxLifetime, err := strconv.Atoi(r.Flags.DBConnMaxLifetime)
+	if err != nil {
+		r.Log.Error("Unable to parse DBConnMaxLifetime", err)
+		r.Log.Info(r.Flags.DBConnMaxLifetime)
+		os.Exit(1)
+		return false
+	}
+	r.Db.SetConnMaxLifetime(time.Second * time.Duration(connMaxLifetime))
+
+	connMaxIdleTime, err := strconv.Atoi(r.Flags.DBConnMaxIdleTime)
+	if err != nil {
+		r.Log.Error("Unable to parse DBConnMaxIdleTime", err)
+		r.Log.Info(r.Flags.DBConnMaxIdleTime)
+		os.Exit(1)
+		return false
+	}
+	r.Db.SetConnMaxIdleTime(time.Second * time.Duration(connMaxIdleTime))
 
 	// Ping verifies a connection to the database is still alive, establishing a connection if necessary.
 	err = r.Db.Ping()

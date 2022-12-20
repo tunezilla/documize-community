@@ -102,7 +102,7 @@ func configFile() (f Flags, ok bool) {
 // commandLineEnv loads command line and OS environment variables required by the program to function.
 func commandLineEnv() (f Flags, ok bool) {
 	ok = true
-	var dbConn, dbType, dbMaxIdleConns, dbMaxOpenConns, jwtKey, siteMode, port, certFile, keyFile, forcePort2SSL, TLSVersion, bucket, minioEndpoint, location string
+	var dbConn, dbType, dbMaxIdleConns, dbMaxOpenConns, dbConnMaxLifetime, dbConnMaxIdleTime, jwtKey, siteMode, port, certFile, keyFile, forcePort2SSL, TLSVersion, bucket, minioEndpoint, location string
 
 	// register(&configFile, "salt", false, "the salt string used to encode JWT tokens, if not set a random value will be generated")
 	register(&jwtKey, "salt", false, "the salt string used to encode JWT tokens, if not set a random value will be generated")
@@ -116,6 +116,8 @@ func commandLineEnv() (f Flags, ok bool) {
 	register(&dbConn, "db", true, `'database specific connection string for example "user:password@tcp(localhost:3306)/dbname"`)
 	register(&dbMaxIdleConns, "dbmaxidleconns", false, `maximum idle connections`)
 	register(&dbMaxOpenConns, "dbmaxopenconns", false, `maximum open connections`)
+	register(&dbConnMaxLifetime, "dbconnmaxlifetime", false, `maximum connection lifetime in seconds`)
+	register(&dbConnMaxIdleTime, "dbconnmaxidletime", false, `maximum connection idle time in seconds`)
 	register(&bucket, "bucket", false, `object storage bucket, defaults to "community"`)
 	register(&minioEndpoint, "minio", false, `specify to use minio instead of S3, for example "http://id:secret@minio:9000"`)
 	register(&location, "location", false, `reserved`)
@@ -150,6 +152,14 @@ func commandLineEnv() (f Flags, ok bool) {
 
 	if len(f.DBMaxOpenConns) == 0 {
 		f.DBMaxOpenConns = "100"
+	}
+
+	if len(f.DBConnMaxLifetime) == 0 {
+		f.DBConnMaxLifetime = "14400"
+	}
+
+	if len(f.DBConnMaxIdleTime) == 0 {
+		f.DBConnMaxIdleTime = "0"
 	}
 
 	return f, ok

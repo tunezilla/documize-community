@@ -18,6 +18,8 @@ type Flags struct {
 	DBConn            string // database connection string
 	DBMaxIdleConns    string // (optional) database max idle connections, default 30
 	DBMaxOpenConns    string // (optional) database max open connections, default 100
+	DBConnMaxLifetime string // (optional) database max connection lifetime in seconds, default 14400 (4 hours)
+	DBConnMaxIdleTime string // (optional) database max connection idle time in seconds, default unlimited
 	Salt              string // the salt string used to encode JWT tokens
 	HTTPPort          string // (optional) HTTP or HTTPS port
 	ForceHTTPPort2SSL string // (optional) HTTP that should be redirected to HTTPS
