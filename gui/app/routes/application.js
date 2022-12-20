@@ -18,6 +18,7 @@ import Route from '@ember/routing/route';
 export default Route.extend(ApplicationRouteMixin, {
 	appMeta: service(),
 	session: service(),
+	pageProgress: service(),
 	pinned: service(),
 	localStorage: service(),
 
@@ -69,6 +70,15 @@ export default Route.extend(ApplicationRouteMixin, {
 			}
 
 			return true; // bubble this event to any parent route
-		}
+		},
+
+		async loading(transition) {
+			const pageProgress = this.get('pageProgress');
+			pageProgress.start(transition.targetName);
+			transition.promise.finally(() => {
+				pageProgress.done();
+			});
+			return true;
+		},
 	}
 });
