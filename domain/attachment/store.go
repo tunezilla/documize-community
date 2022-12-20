@@ -31,6 +31,8 @@ type Store struct {
 	Objects ObjectStorer
 }
 
+const getAttachmentDataTimeout = 5 * time.Minute
+
 // Add inserts the given record into the database attachment table.
 func (s Store) Add(ctx domain.RequestContext, a attachment.Attachment) (err error) {
 	a.OrgID = ctx.OrgID
@@ -41,7 +43,7 @@ func (s Store) Add(ctx domain.RequestContext, a attachment.Attachment) (err erro
 		a.Extension = bits[len(bits)-1]
 	}
 
-	putCtx, cancel := context.WithTimeout(context.TODO(), 5*time.Minute)
+	putCtx, cancel := context.WithTimeout(context.TODO(), getAttachmentDataTimeout)
 	defer cancel()
 
 	err = s.Objects.Put(putCtx, ctx, a, a.Data)
@@ -76,7 +78,7 @@ func (s Store) GetAttachment(ctx domain.RequestContext, orgID, attachmentID stri
 		return
 	}
 
-	getCtx, cancel := context.WithTimeout(context.TODO(), 5*time.Minute)
+	getCtx, cancel := context.WithTimeout(context.TODO(), getAttachmentDataTimeout)
 	defer cancel()
 
 	a.Data, err = s.Objects.Get(getCtx, ctx, a)
@@ -134,6 +136,17 @@ func (s Store) GetSectionAttachments(ctx domain.RequestContext, sectionID string
 		return
 	}
 
+	getCtx, cancel := context.WithTimeout(context.TODO(), getAttachmentDataTimeout*time.Duration(len(a)))
+	defer cancel()
+
+	for i := range a {
+		a[i].Data, err = s.Objects.Get(getCtx, ctx, a[i])
+		if err != nil {
+			err = errors.Wrap(err, "get attachment data")
+			return
+		}
+	}
+
 	return
 }
 
@@ -156,6 +169,17 @@ func (s Store) GetAttachmentsWithData(ctx domain.RequestContext, docID string) (
 
 	if err != nil {
 		err = errors.Wrap(err, "execute select attachments with data")
+	}
+
+	getCtx, cancel := context.WithTimeout(context.TODO(), getAttachmentDataTimeout*time.Duration(len(a)))
+	defer cancel()
+
+	for i := range a {
+		a[i].Data, err = s.Objects.Get(getCtx, ctx, a[i])
+		if err != nil {
+			err = errors.Wrap(err, "get attachment data")
+			return
+		}
 	}
 
 	return
