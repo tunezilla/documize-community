@@ -1200,9 +1200,10 @@ func (h *Handler) GetDiff(w http.ResponseWriter, r *http.Request) {
 	// res, err := cfg.HTMLdiff([]string{latestHTML, previousHTML})
 	res, err := cfg.HTMLdiff([]string{previousHTML, latestHTML})
 	if err != nil {
-		response.WriteServerError(w, method, err)
 		h.Runtime.Log.Error(method, err)
-		return
+		// fall back to plain text instead of showing nothing at all
+		w.Header().Add("X-Documize-Diff-Failure", "yes")
+		res = []string{previousHTML}
 	}
 
 	result = []byte(res[0])
