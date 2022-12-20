@@ -26,14 +26,14 @@ export default Controller.extend({
 		let self = this;
 		let cacheBuster = + new Date();
 
-		$.ajax({
-			url: `https://www.documize.com/community/news/${edition}/${version}.html?cb=${cacheBuster}`,
-			type: 'GET',
-			dataType: 'html',
-			success: function (response) {
-				if (self.get('isDestroyed') || self.get('isDestroying')) return;
-				self.set('newsContent', response);
-			}
-		});
+		// $.ajax({
+		// 	url: `https://www.documize.com/community/news/${edition}/${version}.html?cb=${cacheBuster}`,
+		// 	type: 'GET',
+		// 	dataType: 'html',
+		// 	success: function (response) {
+		// 		if (self.get('isDestroyed') || self.get('isDestroying')) return;
+		// 		self.set('newsContent', response);
+		// 	}
+		// });
 	}
 });

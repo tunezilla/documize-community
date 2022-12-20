@@ -24,14 +24,14 @@ export default Component.extend(Notifier, {
 
 		let self = this;
 		let cacheBuster = + new Date();
-		$.ajax({
-			url: `https://www.documize.com/community/news/summary.html?cb=${cacheBuster}`,
-			type: 'GET',
-			dataType: 'html',
-			success: function (response) {
-				self.set('changelog', response);
-			}
-		});
+		// $.ajax({
+		// 	url: `https://www.documize.com/community/news/summary.html?cb=${cacheBuster}`,
+		// 	type: 'GET',
+		// 	dataType: 'html',
+		// 	success: function (response) {
+		// 		self.set('changelog', response);
+		// 	}
+		// });
 	},
 
 	actions: {

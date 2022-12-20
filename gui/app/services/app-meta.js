@@ -101,22 +101,22 @@ export default Service.extend({
 			let self = this;
 			let cacheBuster = + new Date();
 
-			$.getJSON(`https://www.documize.com/community/news/meta.json?cb=${cacheBuster}`, function (versions) {
-				let cv = 'v' + versions.community.version;
-				let ev = 'v' + versions.enterprise.version;
-				let re = self.get('edition');
-				let rv = self.get('version');
+			// $.getJSON(`https://www.documize.com/community/news/meta.json?cb=${cacheBuster}`, function (versions) {
+			// 	let cv = 'v' + versions.community.version;
+			// 	let ev = 'v' + versions.enterprise.version;
+			// 	let re = self.get('edition');
+			// 	let rv = self.get('version');
 
-				self.set('communityLatest', cv);
-				self.set('enterpriseLatest', ev);
-				self.set('updateAvailable', false); // set to true for testing
+			// 	self.set('communityLatest', cv);
+			// 	self.set('enterpriseLatest', ev);
+			// 	self.set('updateAvailable', false); // set to true for testing
 
-				let isNewCommunity = miscUtil.isNewVersion(rv, cv, true);
-				let isNewEnterprise = miscUtil.isNewVersion(rv, ev, true);
+			// 	let isNewCommunity = miscUtil.isNewVersion(rv, cv, true);
+			// 	let isNewEnterprise = miscUtil.isNewVersion(rv, ev, true);
 
-				if (re === 'Community' && isNewCommunity) self.set('updateAvailable', true);
-				if (re === 'Community+' && isNewEnterprise) self.set('updateAvailable', true);
-			});
+			// 	if (re === 'Community' && isNewCommunity) self.set('updateAvailable', true);
+			// 	if (re === 'Community+' && isNewEnterprise) self.set('updateAvailable', true);
+			// });
 
 			return response;
 		});
