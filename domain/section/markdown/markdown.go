@@ -51,8 +51,10 @@ func (*Provider) Command(ctx *provider.Context, w http.ResponseWriter, r *http.R
 func (*Provider) Render(ctx *provider.Context, config, data string) string {
 	unsafe := blackfriday.Run([]byte(data))
 
-	safe := bluemonday.UGCPolicy().SanitizeBytes(unsafe)
+	policy := bluemonday.UGCPolicy()
+	policy.AllowDataURIImages()
 
+	safe := policy.SanitizeBytes(unsafe)
 	return string(safe)
 }
 

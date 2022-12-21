@@ -32,3 +32,7 @@ We [stop checking for changelogs and news](https://github.com/tunezilla/documize
 ### Page loader
 
 [A progress bar shows between page loads](https://github.com/tunezilla/documize-community/commit/4e785287348e4684fd594eb76340b8c01a24cbd8)
+
+### Others
+
+[Full list](https://github.com/tunezilla/documize-community/compare/documize:community:master...master)
