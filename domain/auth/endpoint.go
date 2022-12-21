@@ -106,6 +106,12 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if org.AuthProvider != auth.AuthProviderDocumize {
+		response.WriteUnauthorizedError(w)
+		h.Runtime.Log.Infof("aborted valid login because %v auth provider is used, expected %v", org.AuthProvider, auth.AuthProviderDocumize)
+		return
+	}
+
 	// Attach user accounts and work out permissions
 	user.AttachUserAccounts(ctx, *h.Store, org.RefID, &u)
 	if len(u.Accounts) == 0 {
