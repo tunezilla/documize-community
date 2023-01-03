@@ -77,7 +77,11 @@ func (p *Provider) Command(ctx *provider.Context, w http.ResponseWriter, r *http
 		// Generate diagram if we have data.
 		var diagram string
 		if len(payload.Data) > 0 {
-			diagram = p.generateDiagram(ctx, payload.Data)
+			diagram, err = p.generateDiagram(ctx, payload.Data)
+			if err != nil {
+				provider.WriteError(w, "plantuml", err)
+				return
+			}
 		}
 		payload.Data = diagram
 
@@ -90,7 +94,8 @@ func (p *Provider) Command(ctx *provider.Context, w http.ResponseWriter, r *http
 
 // Render returns data as-is (HTML).
 func (p *Provider) Render(ctx *provider.Context, config, data string) string {
-	return p.generateDiagram(ctx, data)
+	diagram, _ := p.generateDiagram(ctx, data)
+	return diagram
 }
 
 // Refresh just sends back data as-is.
@@ -98,8 +103,11 @@ func (*Provider) Refresh(ctx *provider.Context, config, data string) string {
 	return data
 }
 
-func (p *Provider) generateDiagram(ctx *provider.Context, data string) string {
-	org, _ := p.Store.Organization.GetOrganization(ctx.Request, ctx.OrgID)
+func (p *Provider) generateDiagram(ctx *provider.Context, data string) (string, error) {
+	org, err := p.Store.Organization.GetOrganization(ctx.Request, ctx.OrgID)
+	if err != nil {
+		return "", err
+	}
 
 	var transport = &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
@@ -108,17 +116,23 @@ func (p *Provider) generateDiagram(ctx *provider.Context, data string) string {
 		}}
 	client := &http.Client{Transport: transport}
 
-	resp, _ := client.Post(org.ConversionEndpoint+"/api/plantuml", "application/text; charset=utf-8", bytes.NewReader([]byte(data)))
+	resp, err := client.Post(org.ConversionEndpoint+"/api/plantuml", "application/text; charset=utf-8", bytes.NewReader([]byte(data)))
+	if err != nil {
+		return "", err
+	}
 	defer func() {
 		if e := resp.Body.Close(); e != nil {
 			fmt.Println("resp.Body.Close error: " + e.Error())
 		}
 	}()
 
-	img, _ := ioutil.ReadAll(resp.Body)
+	img, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
 	enc := base64.StdEncoding.EncodeToString(img)
 
 	// return string(fmt.Sprintf("data:image/png;base64,%s", enc))
 
-	return string(fmt.Sprintf("data:image/svg+xml;base64,%s", enc))
+	return string(fmt.Sprintf("data:image/svg+xml;base64,%s", enc)), nil
 }
