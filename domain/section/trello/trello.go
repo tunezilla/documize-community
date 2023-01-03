@@ -34,6 +34,7 @@ func init() {
 	meta.Description = "Embed cards from boards and lists"
 	meta.ContentType = "trello"
 	meta.PageType = "tab"
+	meta.Retired = true // not used in our fork
 }
 
 // Provider represents Trello

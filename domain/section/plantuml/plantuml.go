@@ -41,6 +41,7 @@ func (*Provider) Meta() provider.TypeMeta {
 	section.ContentType = "plantuml"
 	section.PageType = "tab"
 	section.Order = 9990
+	section.Retired = true // not used in our fork
 
 	return section
 }

@@ -42,6 +42,7 @@ func (*Provider) Meta() provider.TypeMeta {
 	section.Description = "Display log entries"
 	section.ContentType = "papertrail"
 	section.PageType = "tab"
+	section.Retired = true // not used in our fork
 
 	return section
 }
