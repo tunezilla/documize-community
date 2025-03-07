@@ -33,6 +33,12 @@ We [stop checking for changelogs and news](https://github.com/tunezilla/documize
 
 [A progress bar shows between page loads](https://github.com/tunezilla/documize-community/commit/4e785287348e4684fd594eb76340b8c01a24cbd8)
 
+### Attachment Changes
+
+Auth tokens are no longer included in UI-generated attachment links.
+
+Unsafely allow public access to any attachment using "DOCUMIZEUNSAFEALLOWPUBLICATTACHMENTACCESS=true".
+
 ### Others
 
 [Full list](https://github.com/tunezilla/documize-community/compare/documize:community:master...master)

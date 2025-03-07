@@ -49,7 +49,7 @@ export default Component.extend(Modals, Notifier, {
 		if (this.get('session.hasSecureToken')) {
 			qry = '?secure=' + this.get('session.secureToken');
 		} else if (this.get('session.authenticated')) {
-			qry = '?token=' + this.get('session.authToken');
+			// qry = '?token=' + this.get('session.authToken');
 		}
 		this.set('downloadQuery', qry);
 

@@ -14,23 +14,24 @@ package env
 
 // Flags provides access to environment and command line switches for this program.
 type Flags struct {
-	DBType            string // database type
-	DBConn            string // database connection string
-	DBMaxIdleConns    string // (optional) database max idle connections, default 30
-	DBMaxOpenConns    string // (optional) database max open connections, default 100
-	DBConnMaxLifetime string // (optional) database max connection lifetime in seconds, default 14400 (4 hours)
-	DBConnMaxIdleTime string // (optional) database max connection idle time in seconds, default unlimited
-	Salt              string // the salt string used to encode JWT tokens
-	HTTPPort          string // (optional) HTTP or HTTPS port
-	ForceHTTPPort2SSL string // (optional) HTTP that should be redirected to HTTPS
-	SSLCertFile       string // (optional) name of SSL certificate PEM file
-	SSLKeyFile        string // (optional) name of SSL key PEM file
-	TLSVersion        string // (optional) minimum TLS version for SSL connections
-	SiteMode          string // (optional) if 1 then serve offline web page
-	Bucket            string // (optional) object storage bucket, defaults to community
-	MinioEndpoint     string // (optional) if set then use this Minio instance, otherwise S3
-	Location          string // reserved
-	ConfigSource      string // tells us if configuration info was obtained from command line or config file
+	DBType                            string // database type
+	DBConn                            string // database connection string
+	DBMaxIdleConns                    string // (optional) database max idle connections, default 30
+	DBMaxOpenConns                    string // (optional) database max open connections, default 100
+	DBConnMaxLifetime                 string // (optional) database max connection lifetime in seconds, default 14400 (4 hours)
+	DBConnMaxIdleTime                 string // (optional) database max connection idle time in seconds, default unlimited
+	UnsafeAllowPublicAttachmentAccess string // set to "true" to remove attachment restrictions
+	Salt                              string // the salt string used to encode JWT tokens
+	HTTPPort                          string // (optional) HTTP or HTTPS port
+	ForceHTTPPort2SSL                 string // (optional) HTTP that should be redirected to HTTPS
+	SSLCertFile                       string // (optional) name of SSL certificate PEM file
+	SSLKeyFile                        string // (optional) name of SSL key PEM file
+	TLSVersion                        string // (optional) minimum TLS version for SSL connections
+	SiteMode                          string // (optional) if 1 then serve offline web page
+	Bucket                            string // (optional) object storage bucket, defaults to community
+	MinioEndpoint                     string // (optional) if set then use this Minio instance, otherwise S3
+	Location                          string // reserved
+	ConfigSource                      string // tells us if configuration info was obtained from command line or config file
 }
 
 // SSLEnabled returns true if both cert and key were provided at runtime.

@@ -119,6 +119,10 @@ func (h *Handler) Download(w http.ResponseWriter, r *http.Request) {
 		canDownload = true
 	}
 
+	if h.Runtime.Flags.UnsafeAllowPublicAttachmentAccess == "true" {
+		canDownload = true
+	}
+
 	// External users can be sent secure document viewing links.
 	// Those documents may contain attachments that external viewers
 	// can download as required.
