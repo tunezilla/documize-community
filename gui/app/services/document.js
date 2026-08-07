@@ -296,6 +296,18 @@ export default Service.extend({
 	// Attachments
 	//**************************************************
 
+    // upload an attachment
+    addAttachment(documentId, blobInfo) {
+        const formData = new FormData();
+        formData.append('attachment', blobInfo.blob(), blobInfo.filename());
+
+        return this.get('ajax').post(`documents/${documentId}/attachments`, {
+            processData: false,
+            contentType: false,
+            data: formData,
+        });
+    },
+
 	// document attachments without the actual content
 	getAttachments(documentId) {
 		return this.get('ajax').request(`documents/${documentId}/attachments`, {

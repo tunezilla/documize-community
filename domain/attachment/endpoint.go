@@ -14,9 +14,11 @@ package attachment
 import (
 	"bytes"
 	"database/sql"
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/documize/community/core/env"
@@ -42,6 +44,10 @@ type Handler struct {
 	Runtime *env.Runtime
 	Store   *store.Store
 	Indexer indexer.Indexer
+}
+
+type uploadResponse struct {
+	Location string `json:"location"`
 }
 
 // Download sends requested file to the client/browser.
@@ -188,7 +194,7 @@ func (h *Handler) Download(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", typ)
 	w.Header().Set("Content-Disposition", `Attachment; filename="`+a.Filename+`" ; `+`filename*="`+a.Filename+`"`)
 	if dataSize != 0 {
-		w.Header().Set("Content-Length", string(dataSize))
+		w.Header().Set("Content-Length", strconv.Itoa(dataSize))
 	}
 
 	_, err = w.Write(a.Data)
@@ -373,5 +379,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 		go h.Indexer.DeleteDocument(ctx, d.RefID)
 	}
 
-	response.WriteEmpty(w)
+	// XXX golang doesn't allow circular refs or type imports like C/Rust/TS does
+	location := uploadResponse{Location: fmt.Sprintf("/api/public/attachment/%s/%s", ctx.OrgID, a.RefID)}
+	response.WriteJSON(w, location)
 }
