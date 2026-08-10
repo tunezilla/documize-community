@@ -1,29 +1,39 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"log"
 	"os"
+	"math/rand"
 	"strings"
 	"time"
-	"path"
 
 	_ "github.com/lib/pq"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
 
+	uuid "github.com/nu7hatch/gouuid"
+
+	"github.com/documize/community/core/secrets"
+	"github.com/documize/community/core/uniqueid"
 	"github.com/documize/community/domain/attachment"
-	"github.com/documize/community/domain"
 	"github.com/documize/community/model/page"
 	mat "github.com/documize/community/model/attachment"
 )
 
-func attachmentS3Path(orgID string, refID string, fileName string) string {
-	return fmt.Sprintf("%v/%v/%v", orgID, refID, path.Clean(fileName))
+const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func randStringBytes(n int) string {
+	b := make([]byte, n)
+
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+
+	return string(b)
 }
 
 func migratePages(db *sql.DB, storer attachment.ObjectStorer) {
@@ -57,20 +67,23 @@ func migratePages(db *sql.DB, storer attachment.ObjectStorer) {
 func processPage(db *sql.DB, page *page.Page, storer attachment.ObjectStorer) {
 	doc, err := html.Parse(strings.NewReader(page.Body))
 	if err != nil {
-		log.Printf("could not parse page #%i: %v", page.ID, err)
+		log.Printf("could not parse page #%d: %v", page.ID, err)
 		return
 	}
 
+	changed := false
 	for n := range doc.Descendants() {
 		if n.Type == html.ElementNode && n.DataAtom == atom.Img {
-			for _, a := range n.Attr {
+			for i := range n.Attr {
+				a := n.Attr[i]
 				if a.Key == "src" {
 					if strings.HasPrefix(a.Val, "data:") {
-						uri, err := attachmentize(db, storer, page, a.Val)
+						location, err := attachmentize(db, storer, page, a.Val)
 						if err != nil {
 							log.Printf("could not create blob: %v", err)
 						} else {
-							a.Val = uri
+							changed = true
+							n.Attr[i].Val = location
 						}
 					}
 				}
@@ -78,9 +91,28 @@ func processPage(db *sql.DB, page *page.Page, storer attachment.ObjectStorer) {
 		}
 	}
 
-	var buf strings.Builder
-	html.Render(&buf, doc)
-	page.Body = buf.String()
+	if changed {
+		var buf strings.Builder
+		html.Render(&buf, doc)
+		previousBodySize := len(page.Body)
+		page.Body = buf.String()
+
+		_, err = db.Exec("UPDATE dmz_section SET c_body = $1 WHERE id = $2", page.Body, page.ID)
+		if err != nil {
+			log.Printf("could not update page with new body")
+		}
+
+		log.Printf("previousPageLen=%d currentPageLen=%d", previousBodySize, len(page.Body))
+	}
+}
+
+func contentTypeToExtension(contentType string) string {
+	if strings.HasPrefix(contentType, "image/") {
+		after, _ := strings.CutPrefix(contentType, "image/")
+		return after
+	}
+
+	return "txt"
 }
 
 func attachmentize(db *sql.DB, storer attachment.ObjectStorer, page *page.Page, imgBlob string) (string, error) {
@@ -89,16 +121,41 @@ func attachmentize(db *sql.DB, storer attachment.ObjectStorer, page *page.Page, 
 		return "", err
 	}
 
+	newUUID, err := uuid.NewV4()
+	if err != nil {
+		return "", err
+	}
+
+	extension := contentTypeToExtension(contentType)
+	fileName := randStringBytes(12)
+	random := secrets.GenerateSalt()
+
 	a := mat.Attachment{
 		OrgID: page.OrgID,
 		DocumentID: page.DocumentID,
-		SectionID: page.ID,
-		Job: "",
-		FileID: "",
-		Filename: "",
+		SectionID: page.RefID,
+		Job: newUUID.String(),
+		FileID: random[0:9],
+		Filename: fileName,
 		Data: []byte(""),
-		Extension: "",
+		Extension: extension,
 	}
+	a.RefID = uniqueid.Generate()
+	a.Created = time.Now().UTC()
+	a.Revised = time.Now().UTC()
+
+	err = storer.PutNoContext(a, blob)
+	if err != nil {
+		return "", err
+	}
+
+	_, err = db.Exec("INSERT INTO dmz_doc_attachment (c_refid, c_orgid, c_docid, c_sectionid, c_job, c_fileid, c_filename, c_data, c_extension, c_created, c_revised) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)", a.RefID, a.OrgID, a.DocumentID, a.SectionID, a.Job, a.FileID, a.Filename, a.Data, a.Extension, a.Created, a.Revised)
+	if err != nil {
+		return "", err
+	}
+
+	location := fmt.Sprintf("/api/public/attachment/%s/%s", a.OrgID, a.RefID)
+	return location, nil
 }
 
 func dataURIToBlob(uri string) (data []byte, contentType string, err error) {
@@ -145,6 +202,9 @@ func main() {
 
 	minioUrl := os.Getenv("DOCUMIZEMINIO")
 	minioBucket := os.Getenv("DOCUMIZEMINIOBUCKET")
+	if minioBucket == "" {
+		minioBucket = "community"
+	}
 	if minioUrl == "" {
 		objectStorer, err = attachment.S3Storer(minioBucket)
 	} else {

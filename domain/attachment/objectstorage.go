@@ -22,10 +22,11 @@ import (
 type ObjectStorer interface {
 	Get(ctx context.Context, rctx domain.RequestContext, a attachment.Attachment) ([]byte, error)
 	Put(ctx context.Context, rctx domain.RequestContext, a attachment.Attachment, data []byte) error
+	PutNoContext(a attachment.Attachment, data []byte) error
 }
 
-func attachmentS3Path(ctx domain.RequestContext, a attachment.Attachment) string {
-	return fmt.Sprintf("%v/%v/%v", ctx.OrgID, a.RefID, path.Clean(a.Filename))
+func attachmentS3Path(a attachment.Attachment) string {
+	return fmt.Sprintf("%v/%v/%v", a.OrgID, a.RefID, path.Clean(a.Filename))
 }
 
 type s3BucketStorer struct {
@@ -34,7 +35,7 @@ type s3BucketStorer struct {
 }
 
 func (s *s3BucketStorer) Get(ctx context.Context, rctx domain.RequestContext, a attachment.Attachment) ([]byte, error) {
-	filepath := attachmentS3Path(rctx, a)
+	filepath := attachmentS3Path(a)
 	res, err := s.S3.GetObject(&s3.GetObjectInput{
 		Bucket: &s.Bucket,
 		Key:    &filepath,
@@ -58,9 +59,29 @@ func (s *s3BucketStorer) Put(ctx context.Context, rctx domain.RequestContext, a 
 		return err
 	}
 	md5 := base64.StdEncoding.EncodeToString(md5Builder.Sum(nil))
-	filepath := attachmentS3Path(rctx, a)
+	filepath := attachmentS3Path(a)
 
 	if _, err := s.S3.PutObjectWithContext(ctx, &s3.PutObjectInput{
+		Bucket:     &s.Bucket,
+		Body:       bytes.NewReader(data),
+		Key:        &filepath,
+		ContentMD5: &md5,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *s3BucketStorer) PutNoContext(a attachment.Attachment, data []byte) error {
+	md5Builder := md5.New()
+	if _, err := md5Builder.Write(data); err != nil {
+		return err
+	}
+	md5 := base64.StdEncoding.EncodeToString(md5Builder.Sum(nil))
+	filepath := attachmentS3Path(a)
+
+	if _, err := s.S3.PutObject(&s3.PutObjectInput{
 		Bucket:     &s.Bucket,
 		Body:       bytes.NewReader(data),
 		Key:        &filepath,
