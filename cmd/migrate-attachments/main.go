@@ -102,7 +102,7 @@ func processPage(db *sql.DB, page *page.Page, storer attachment.ObjectStorer) {
 			log.Printf("could not update page with new body")
 		}
 
-		log.Printf("previousPageLen=%d currentPageLen=%d", previousBodySize, len(page.Body))
+		log.Printf("name=%s previousPageLen=%d currentPageLen=%d", page.Name, previousBodySize, len(page.Body))
 	}
 }
 
