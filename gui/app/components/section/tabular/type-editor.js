@@ -18,6 +18,7 @@ import Notifier from '../../../mixins/notifier';
 import Component from '@ember/component';
 
 export default Component.extend(Modals, Notifier, {
+    documentService: service('document'),
 	appMeta: service(),
 	link: service(),
 	pageBody: '',
@@ -70,10 +71,13 @@ export default Component.extend(Modals, Notifier, {
 				browser_spellcheck: true,
 				statusbar: false,
 				inline: true,
-				paste_data_images: true,
-				images_upload_handler: function (blobInfo, success, failure) { // eslint-disable-line no-unused-vars
-					success("data:" + blobInfo.blob().type + ";base64," + blobInfo.base64());
-				},
+				paste_data_images: false,
+                images_upload_handler: (blobInfo, success, failure) => {
+                    this.get('documentService')
+                        .addAttachment(this.get('document.id'), blobInfo)
+                        .then(response => success(response.location))
+                        .catch(error => failure({ message: `Upload failed: ${error}`, remove: true }));
+                },
 				image_advtab: true,
 				media_live_embeds: true,
 				theme: 'silver',
