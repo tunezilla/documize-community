@@ -53,7 +53,7 @@ export default Component.extend({
 				paste_data_images: false,
                 images_upload_handler: (blobInfo, success, failure) => {
                     this.get('documentService')
-                        .addAttachment(this.get('document.id'), blobInfo)
+                        .addAttachment(this.get('document.id'), this.get('page.id'), blobInfo)
                         .then(response => success(response.location))
                         .catch(error => failure({ message: `Upload failed: ${error}`, remove: true }));
                 },
