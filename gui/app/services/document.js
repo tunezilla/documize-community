@@ -297,11 +297,11 @@ export default Service.extend({
 	//**************************************************
 
     // upload an attachment
-    addAttachment(documentId, blobInfo) {
+    addAttachment(documentId, pageId, blobInfo) {
         const formData = new FormData();
         formData.append('attachment', blobInfo.blob(), blobInfo.filename());
 
-        return this.get('ajax').post(`documents/${documentId}/attachments`, {
+        return this.get('ajax').post(`documents/${documentId}/attachments?page=${pageId}`, {
             processData: false,
             contentType: false,
             data: formData,
