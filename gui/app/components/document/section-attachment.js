@@ -33,6 +33,11 @@ export default Component.extend(Modals, Notifier, {
 		this.uploadLabel = this.i18n.localize('upload_attachment');
 	},
 
+    get pageFiles() {
+        const pageId = this.get('page.id');
+        return this.get('files').filter(f => f.pageId === pageId);
+    },
+
 	didReceiveAttrs() {
 		this._super(...arguments);
 
