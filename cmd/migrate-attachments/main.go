@@ -52,9 +52,9 @@ func migratePages(db *sql.DB, storer attachment.ObjectStorer) {
 		var p page.Page
 		if err := rows.Scan(&p.ID, &p.RefID, &p.OrgID, &p.DocumentID, &p.UserID, &p.ContentType, &p.Body); err != nil {
 			log.Printf("couldn't get next page: %v", err)
+		} else {
+			processPage(db, &p, storer)
 		}
-
-		processPage(db, &p, storer)
 	}
 
 	err = rows.Err()
@@ -63,22 +63,42 @@ func migratePages(db *sql.DB, storer attachment.ObjectStorer) {
 	}
 }
 
-// replaces body content of the page and uploads the images
-func processPage(db *sql.DB, page *page.Page, storer attachment.ObjectStorer) {
-	doc, err := html.Parse(strings.NewReader(page.Body))
+func migratePageMetas(db *sql.DB, storer attachment.ObjectStorer) {
+	const q = `
+		SELECT id, c_orgid, c_sectionid, c_docid, c_rawbody
+		FROM dmz_section_meta
+		`
+
+	rows, err := db.Query(q)
 	if err != nil {
-		log.Printf("could not parse page #%d: %v", page.ID, err)
-		return
+		log.Fatalf("couldn't query for page meta: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var m page.Meta
+		if err := rows.Scan(&m.ID, &m.OrgID, &m.SectionID, &m.DocumentID, &m.RawBody); err != nil {
+			log.Printf("couldn't get next page meta: %v", err)
+		} else {
+			processPageMeta(db, &m, storer)
+		}
 	}
 
+	err = rows.Err()
+	if err != nil {
+		log.Printf("error during row iteration: %v", err)
+	}
+}
+
+func processNode(db *sql.DB, node *html.Node, orgID string, documentID string, refID string, storer attachment.ObjectStorer) bool {
 	changed := false
-	for n := range doc.Descendants() {
+	for n := range node.Descendants() {
 		if n.Type == html.ElementNode && n.DataAtom == atom.Img {
 			for i := range n.Attr {
 				a := n.Attr[i]
 				if a.Key == "src" {
 					if strings.HasPrefix(a.Val, "data:") {
-						location, err := attachmentize(db, storer, page, a.Val)
+						location, err := attachmentize(db, storer, orgID, documentID, refID, a.Val)
 						if err != nil {
 							log.Printf("could not create blob: %v", err)
 						} else {
@@ -91,7 +111,40 @@ func processPage(db *sql.DB, page *page.Page, storer attachment.ObjectStorer) {
 		}
 	}
 
-	if changed {
+	return changed
+}
+
+func processPageMeta(db *sql.DB, meta *page.Meta, storer attachment.ObjectStorer) {
+	doc, err := html.Parse(strings.NewReader(meta.RawBody))
+	if err != nil {
+		log.Printf("could not parse page meta #%d: %v", meta.ID, err)
+		return
+	}
+
+	if processNode(db, doc, meta.OrgID, meta.DocumentID, meta.SectionID, storer) {
+		var buf strings.Builder
+		html.Render(&buf, doc)
+		previousBodySize := len(meta.RawBody)
+		meta.RawBody = buf.String()
+
+		_, err = db.Exec("UPDATE dmz_section_meta SET c_rawbody = $1 WHERE id = $2", meta.RawBody, meta.ID)
+		if err != nil {
+			log.Printf("could not update page with new body")
+		}
+
+		log.Printf("sectionID=%s previousPageLen=%d currentPageLen=%d", meta.SectionID, previousBodySize, len(meta.RawBody))
+	}
+}
+
+// replaces body content of the page and uploads the images
+func processPage(db *sql.DB, page *page.Page, storer attachment.ObjectStorer) {
+	doc, err := html.Parse(strings.NewReader(page.Body))
+	if err != nil {
+		log.Printf("could not parse page #%d: %v", page.ID, err)
+		return
+	}
+
+	if processNode(db, doc, page.OrgID, page.DocumentID, page.RefID, storer) {
 		var buf strings.Builder
 		html.Render(&buf, doc)
 		previousBodySize := len(page.Body)
@@ -115,7 +168,7 @@ func contentTypeToExtension(contentType string) string {
 	return "txt"
 }
 
-func attachmentize(db *sql.DB, storer attachment.ObjectStorer, page *page.Page, imgBlob string) (string, error) {
+func attachmentize(db *sql.DB, storer attachment.ObjectStorer, orgID string, documentID string, refID string, imgBlob string) (string, error) {
 	blob, contentType, err := dataURIToBlob(imgBlob)
 	if err != nil {
 		return "", err
@@ -131,9 +184,9 @@ func attachmentize(db *sql.DB, storer attachment.ObjectStorer, page *page.Page, 
 	random := secrets.GenerateSalt()
 
 	a := mat.Attachment{
-		OrgID: page.OrgID,
-		DocumentID: page.DocumentID,
-		SectionID: page.RefID,
+		OrgID: orgID,
+		DocumentID: documentID,
+		SectionID: refID,
 		Job: newUUID.String(),
 		FileID: random[0:9],
 		Filename: fileName,
@@ -218,4 +271,5 @@ func main() {
 	}
 
 	migratePages(db, objectStorer)
+	migratePageMetas(db, objectStorer)
 }
