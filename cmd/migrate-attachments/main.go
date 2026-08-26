@@ -197,12 +197,13 @@ func attachmentize(db *sql.DB, storer attachment.ObjectStorer, orgID string, doc
 	a.Created = time.Now().UTC()
 	a.Revised = time.Now().UTC()
 
-	err = storer.PutNoContext(a, blob)
+	a.MD5, err = storer.PutNoContext(a, blob)
 	if err != nil {
 		return "", err
 	}
 
-	_, err = db.Exec("INSERT INTO dmz_doc_attachment (c_refid, c_orgid, c_docid, c_sectionid, c_job, c_fileid, c_filename, c_data, c_extension, c_created, c_revised) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)", a.RefID, a.OrgID, a.DocumentID, a.SectionID, a.Job, a.FileID, a.Filename, a.Data, a.Extension, a.Created, a.Revised)
+	_, err = db.Exec("INSERT INTO dmz_doc_attachment (c_refid, c_orgid, c_docid, c_sectionid, c_job, c_fileid, c_filename, c_data, c_extension, c_created, c_revised, c_md5) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)",
+		a.RefID, a.OrgID, a.DocumentID, a.SectionID, a.Job, a.FileID, a.Filename, a.Data, a.Extension, a.Created, a.Revised, a.MD5)
 	if err != nil {
 		return "", err
 	}

@@ -24,4 +24,5 @@ type Attachment struct {
 	Filename   string `json:"filename"`
 	Data       []byte `json:"data"`
 	Extension  string `json:"extension"`
+	MD5		   string `json:"md5"`
 }

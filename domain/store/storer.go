@@ -211,6 +211,7 @@ type AttachmentStorer interface {
 	GetAttachments(ctx domain.RequestContext, docID string) (a []attachment.Attachment, err error)
 	GetSectionAttachments(ctx domain.RequestContext, sectionID string) (a []attachment.Attachment, err error)
 	GetAttachmentsWithData(ctx domain.RequestContext, docID string) (a []attachment.Attachment, err error)
+	ByMD5(ctx domain.RequestContext, md5 []string) (ax []attachment.Attachment, err error)
 	Delete(ctx domain.RequestContext, id string) (rows int64, err error)
 	DeleteSection(ctx domain.RequestContext, id string) (rows int64, err error)
 }

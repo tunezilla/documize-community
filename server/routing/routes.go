@@ -230,6 +230,7 @@ func RegisterEndpoints(rt *env.Runtime, s *store.Store) {
 	AddPrivate(rt, "fetch/category/space/{spaceID}", []string{"GET", "OPTIONS"}, nil, category.FetchSpaceData)
 	AddPrivate(rt, "fetch/document/{documentID}", []string{"GET", "OPTIONS"}, nil, document.FetchDocumentData)
 	AddPrivate(rt, "fetch/page/{documentID}", []string{"GET", "OPTIONS"}, nil, page.FetchPages)
+	AddPrivate(rt, "fetch/attachment", []string{"GET", "OPTIONS"}, nil, attachment.QueryAttachments)
 
 	// global admin routes
 	AddPrivate(rt, "global/smtp", []string{"GET", "OPTIONS"}, nil, setting.SMTP)

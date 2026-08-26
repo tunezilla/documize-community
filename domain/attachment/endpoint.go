@@ -235,6 +235,32 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, a)
 }
 
+// FetchAttachments is an end-point that returns all attachments matching the query string
+// BE CAREFUL since there are no guards on this (i.e. you can view the metadata on any attachments).
+func (h *Handler) QueryAttachments(w http.ResponseWriter, r *http.Request) {
+	method := "attachment.QueryAttachments"
+	ctx := domain.GetRequestContext(r)
+
+	q := r.URL.Query()
+	md5, ok := q["md5"]
+	if !ok || len(md5) == 0 {
+		response.WriteMissingDataError(w, method, "md5")
+		return
+	}
+
+	ax, err := h.Store.Attachment.ByMD5(ctx, md5)
+	if err != nil {
+		h.Runtime.Log.Error("query attachments", err)
+		response.WriteServerError(w, method, err)
+		return
+	}
+	if ax == nil {
+		ax = []attachment.Attachment{}
+	}
+
+	response.WriteJSON(w, ax)
+}
+
 // Delete is an endpoint that deletes a particular document attachment.
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	method := "attachment.DeleteAttachment"
