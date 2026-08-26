@@ -267,12 +267,6 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	ctx := domain.GetRequestContext(r)
 
-	documentID := request.Param(r, "documentID")
-	if len(documentID) == 0 {
-		response.WriteMissingDataError(w, method, "documentID")
-		return
-	}
-
 	attachmentID := request.Param(r, "attachmentID")
 	if len(attachmentID) == 0 {
 		response.WriteMissingDataError(w, method, "attachmentID")
@@ -285,15 +279,15 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !permission.CanChangeDocument(ctx, *h.Store, documentID) {
-		response.WriteForbiddenError(w)
-		return
-	}
-
 	a, err := h.Store.Attachment.GetAttachmentMeta(ctx, ctx.OrgID, attachmentID)
 	if err != nil {
 		h.Runtime.Log.Error("could not find", err)
 		response.WriteNotFoundError(w, method, attachmentID)
+		return
+	}
+
+	if !permission.CanChangeDocument(ctx, *h.Store, a.DocumentID) {
+		response.WriteForbiddenError(w)
 		return
 	}
 
