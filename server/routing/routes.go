@@ -129,6 +129,7 @@ func RegisterEndpoints(rt *env.Runtime, s *store.Store) {
 	AddPrivate(rt, "documents/{documentID}/pages/{pageID}", []string{"GET", "OPTIONS"}, nil, page.GetPage)
 	AddPrivate(rt, "documents/{documentID}/pages", []string{"POST", "OPTIONS"}, nil, page.Add)
 	AddPrivate(rt, "documents/{documentID}/attachments", []string{"GET", "OPTIONS"}, nil, attachment.Get)
+	AddPrivate(rt, "documents/{documentID}/attachments/{attachmentID}", []string{"POST", "OPTIONS"}, nil, attachment.Update)
 	AddPrivate(rt, "documents/{documentID}/attachments/{attachmentID}", []string{"DELETE", "OPTIONS"}, nil, attachment.Delete)
 	AddPrivate(rt, "documents/{documentID}/attachments", []string{"POST", "OPTIONS"}, nil, attachment.Add)
 	AddPrivate(rt, "documents/{documentID}/pages/{pageID}/meta", []string{"GET", "OPTIONS"}, nil, page.GetMeta)
@@ -230,7 +231,7 @@ func RegisterEndpoints(rt *env.Runtime, s *store.Store) {
 	AddPrivate(rt, "fetch/category/space/{spaceID}", []string{"GET", "OPTIONS"}, nil, category.FetchSpaceData)
 	AddPrivate(rt, "fetch/document/{documentID}", []string{"GET", "OPTIONS"}, nil, document.FetchDocumentData)
 	AddPrivate(rt, "fetch/page/{documentID}", []string{"GET", "OPTIONS"}, nil, page.FetchPages)
-	AddPrivate(rt, "fetch/attachment", []string{"GET", "OPTIONS"}, nil, attachment.QueryAttachments)
+	AddPrivate(rt, "fetch/attachments", []string{"GET", "OPTIONS"}, nil, attachment.Query)
 
 	// global admin routes
 	AddPrivate(rt, "global/smtp", []string{"GET", "OPTIONS"}, nil, setting.SMTP)

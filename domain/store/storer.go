@@ -208,10 +208,12 @@ type SettingStorer interface {
 type AttachmentStorer interface {
 	Add(ctx domain.RequestContext, a attachment.Attachment) (err error)
 	GetAttachment(ctx domain.RequestContext, orgID, attachmentID string) (a attachment.Attachment, err error)
+	GetAttachmentMeta(ctx domain.RequestContext, orgID, attachmentID string) (a attachment.Attachment, err error)
 	GetAttachments(ctx domain.RequestContext, docID string) (a []attachment.Attachment, err error)
 	GetSectionAttachments(ctx domain.RequestContext, sectionID string) (a []attachment.Attachment, err error)
 	GetAttachmentsWithData(ctx domain.RequestContext, docID string) (a []attachment.Attachment, err error)
 	ByMD5(ctx domain.RequestContext, md5 []string) (ax []attachment.Attachment, err error)
+	UpdateData(ctx domain.RequestContext, a attachment.Attachment) (err error)
 	Delete(ctx domain.RequestContext, id string) (rows int64, err error)
 	DeleteSection(ctx domain.RequestContext, id string) (rows int64, err error)
 }

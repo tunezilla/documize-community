@@ -63,25 +63,19 @@ func (s Store) Add(ctx domain.RequestContext, a attachment.Attachment) (err erro
 }
 
 // Update data of existing attachment
-// Only sets the data (S3), revised, filename, extension, and MD5sum. Nothing else.
+// Only sets the data (S3), revised, and MD5sum. Nothing else.
 func (s Store) UpdateData(ctx domain.RequestContext, a attachment.Attachment) (err error) {
-	a.OrgID = ctx.OrgID
-	if len(a.Extension) == 0 {
-		bits := strings.Split(a.Filename, ".")
-		a.Extension = bits[len(bits)-1]
-	}
-
 	putCtx, cancel := context.WithTimeout(context.TODO(), getAttachmentDataTimeout)
 	defer cancel()
 
-	a.MD5, err = s.Objects.Put(putCtx, ctx, a, a.Data)
+	md5, err := s.Objects.Put(putCtx, ctx, a, a.Data)
 	if err != nil {
 		err = errors.Wrap(err, "put attachment data")
 		return
 	}
 
-	_, err = ctx.Transaction.Exec(s.Bind("UPDATE dmz_doc_attachment SET c_filename = ?, c_extension = ?, c_revised = ?, c_md5 = ? WHERE id = ?"),
-		a.Filename, a.Extension, time.Now().UTC(), a.MD5, a.ID)
+	_, err = s.Runtime.Db.Exec(s.Bind("UPDATE dmz_doc_attachment SET c_revised = ?, c_md5 = ? WHERE c_refid = ?"),
+		time.Now().UTC(), md5, a.RefID)
 
 	if err != nil {
 		err = errors.Wrap(err, "execute update attachment data")
@@ -121,7 +115,7 @@ func (s Store) GetAttachmentMeta(ctx domain.RequestContext, orgID, attachmentID 
         SELECT id, c_refid AS refid,
         c_orgid AS orgid, c_docid AS documentid, c_sectionid AS sectionid, c_job AS job, c_fileid AS fileid,
         c_filename AS filename, c_data AS data, c_extension AS extension,
-        c_created AS created, c_revised AS revised, c_md5 as md5
+        c_created AS created, c_revised AS revised, COALESCE(c_md5, '') as md5
         FROM dmz_doc_attachment
         WHERE c_orgid=? and c_refid=?`),
 		orgID, attachmentID)

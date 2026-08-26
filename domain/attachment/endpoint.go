@@ -235,10 +235,10 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, a)
 }
 
-// FetchAttachments is an end-point that returns all attachments matching the query string
+// Query is an end-point that returns all attachments matching the query string
 // BE CAREFUL since there are no guards on this (i.e. you can view the metadata on any attachments).
-func (h *Handler) QueryAttachments(w http.ResponseWriter, r *http.Request) {
-	method := "attachment.QueryAttachments"
+func (h *Handler) Query(w http.ResponseWriter, r *http.Request) {
+	method := "attachment.QueryAttachment"
 	ctx := domain.GetRequestContext(r)
 
 	q := r.URL.Query()
@@ -259,6 +259,61 @@ func (h *Handler) QueryAttachments(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.WriteJSON(w, ax)
+}
+
+// Update is an endpoint that updates only the data and data-related fields of a document attachment.
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
+	method := "attachment.UpdateAttachment"
+
+	ctx := domain.GetRequestContext(r)
+
+	documentID := request.Param(r, "documentID")
+	if len(documentID) == 0 {
+		response.WriteMissingDataError(w, method, "documentID")
+		return
+	}
+
+	attachmentID := request.Param(r, "attachmentID")
+	if len(attachmentID) == 0 {
+		response.WriteMissingDataError(w, method, "attachmentID")
+		return
+	}
+
+	filedata, _, err := r.FormFile("attachment")
+	if err != nil {
+		response.WriteMissingDataError(w, method, "attachment")
+		return
+	}
+
+	if !permission.CanChangeDocument(ctx, *h.Store, documentID) {
+		response.WriteForbiddenError(w)
+		return
+	}
+
+	a, err := h.Store.Attachment.GetAttachmentMeta(ctx, ctx.OrgID, attachmentID)
+	if err != nil {
+		h.Runtime.Log.Error("could not find", err)
+		response.WriteNotFoundError(w, method, attachmentID)
+		return
+	}
+
+	b := new(bytes.Buffer)
+	_, err = io.Copy(b, filedata)
+	if err != nil {
+		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error("add attachment", err)
+		return
+	}
+
+	a.Data = b.Bytes()
+	err = h.Store.Attachment.UpdateData(ctx, a)
+	if err != nil {
+		h.Runtime.Log.Error("update attachment data", err)
+		response.WriteServerError(w, method, err)
+		return
+	}
+
+	response.WriteEmpty(w)
 }
 
 // Delete is an endpoint that deletes a particular document attachment.
