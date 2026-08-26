@@ -242,7 +242,7 @@ func (h *Handler) Query(w http.ResponseWriter, r *http.Request) {
 	ctx := domain.GetRequestContext(r)
 
 	q := r.URL.Query()
-	md5, ok := q["md5"]
+	md5, ok := q["md5[]"]
 	if !ok || len(md5) == 0 {
 		response.WriteMissingDataError(w, method, "md5")
 		return
