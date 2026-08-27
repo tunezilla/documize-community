@@ -21,6 +21,7 @@ import (
 	"github.com/documize/community/domain/store"
 	"github.com/documize/community/model/attachment"
 	"github.com/pkg/errors"
+	"github.com/jmoiron/sqlx"
 )
 
 // Store provides data access to document/section attachments information.
@@ -45,14 +46,14 @@ func (s Store) Add(ctx domain.RequestContext, a attachment.Attachment) (err erro
 	putCtx, cancel := context.WithTimeout(context.TODO(), getAttachmentDataTimeout)
 	defer cancel()
 
-	err = s.Objects.Put(putCtx, ctx, a, a.Data)
+	a.MD5, err = s.Objects.Put(putCtx, ctx, a, a.Data)
 	if err != nil {
 		err = errors.Wrap(err, "put attachment data")
 		return
 	}
 
-	_, err = ctx.Transaction.Exec(s.Bind("INSERT INTO dmz_doc_attachment (c_refid, c_orgid, c_docid, c_sectionid, c_job, c_fileid, c_filename, c_data, c_extension, c_created, c_revised) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"),
-		a.RefID, a.OrgID, a.DocumentID, a.SectionID, a.Job, a.FileID, a.Filename, []byte{}, a.Extension, a.Created, a.Revised)
+	_, err = ctx.Transaction.Exec(s.Bind("INSERT INTO dmz_doc_attachment (c_refid, c_orgid, c_docid, c_sectionid, c_job, c_fileid, c_filename, c_data, c_extension, c_created, c_revised, c_md5) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"),
+		a.RefID, a.OrgID, a.DocumentID, a.SectionID, a.Job, a.FileID, a.Filename, []byte{}, a.Extension, a.Created, a.Revised, a.MD5)
 
 	if err != nil {
 		err = errors.Wrap(err, "execute insert attachment")
@@ -61,19 +62,76 @@ func (s Store) Add(ctx domain.RequestContext, a attachment.Attachment) (err erro
 	return
 }
 
-// GetAttachment returns the database attachment record specified by the parameters.
-func (s Store) GetAttachment(ctx domain.RequestContext, orgID, attachmentID string) (a attachment.Attachment, err error) {
+// Update data of existing attachment
+// Only sets the data (S3), revised, and MD5sum. Nothing else.
+func (s Store) UpdateData(ctx domain.RequestContext, a attachment.Attachment) (err error) {
+	putCtx, cancel := context.WithTimeout(context.TODO(), getAttachmentDataTimeout)
+	defer cancel()
+
+	md5, err := s.Objects.Put(putCtx, ctx, a, a.Data)
+	if err != nil {
+		err = errors.Wrap(err, "put attachment data")
+		return
+	}
+
+	_, err = s.Runtime.Db.Exec(s.Bind("UPDATE dmz_doc_attachment SET c_revised = ?, c_md5 = ? WHERE c_refid = ?"),
+		time.Now().UTC(), md5, a.RefID)
+
+	if err != nil {
+		err = errors.Wrap(err, "execute update attachment data")
+	}
+
+	return
+}
+
+// ByMD5 returns the attachments that have their content hash to a particular MD5 hash
+// All provided MD5 hashes are Base64-encoded, in case this wasn't clear on the outset.
+func (s Store) ByMD5(ctx domain.RequestContext, md5 []string) (ax []attachment.Attachment, err error) {
+	query, args, err := sqlx.In(`
+        SELECT id, c_refid AS refid,
+        c_orgid AS orgid, c_docid AS documentid, c_sectionid AS sectionid, c_job AS job, c_fileid AS fileid,
+        c_filename AS filename, c_data AS data, c_extension AS extension,
+        c_created AS created, c_revised AS revised, c_md5 as md5
+        FROM dmz_doc_attachment
+        WHERE c_md5 IN (?)`, md5)
+	if err != nil {
+		err = errors.Wrap(err, "execute sqlx.In()")
+		return
+	}
+
+	err = s.Runtime.Db.Select(&ax, s.Bind(query), args...)
+
+	if err != nil {
+		err = errors.Wrap(err, "execute select attachment")
+		return
+	}
+
+	return
+}
+
+// GetAttachmentMeta returns the database attachment record specified by the parameters, without the data.
+func (s Store) GetAttachmentMeta(ctx domain.RequestContext, orgID, attachmentID string) (a attachment.Attachment, err error) {
 	err = s.Runtime.Db.Get(&a, s.Bind(`
         SELECT id, c_refid AS refid,
         c_orgid AS orgid, c_docid AS documentid, c_sectionid AS sectionid, c_job AS job, c_fileid AS fileid,
         c_filename AS filename, c_data AS data, c_extension AS extension,
-        c_created AS created, c_revised AS revised
+        c_created AS created, c_revised AS revised, COALESCE(c_md5, '') as md5
         FROM dmz_doc_attachment
         WHERE c_orgid=? and c_refid=?`),
 		orgID, attachmentID)
 
 	if err != nil {
 		err = errors.Wrap(err, "execute select attachment")
+		return
+	}
+
+	return
+}
+
+// GetAttachment returns the database attachment record specified by the parameters.
+func (s Store) GetAttachment(ctx domain.RequestContext, orgID, attachmentID string) (a attachment.Attachment, err error) {
+	a, err = s.GetAttachmentMeta(ctx, orgID, attachmentID)
+	if err != nil {
 		return
 	}
 

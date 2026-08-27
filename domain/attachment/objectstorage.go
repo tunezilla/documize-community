@@ -21,8 +21,8 @@ import (
 
 type ObjectStorer interface {
 	Get(ctx context.Context, rctx domain.RequestContext, a attachment.Attachment) ([]byte, error)
-	Put(ctx context.Context, rctx domain.RequestContext, a attachment.Attachment, data []byte) error
-	PutNoContext(a attachment.Attachment, data []byte) error
+	Put(ctx context.Context, rctx domain.RequestContext, a attachment.Attachment, data []byte) (string, error)
+	PutNoContext(a attachment.Attachment, data []byte) (string, error)
 }
 
 func attachmentS3Path(a attachment.Attachment) string {
@@ -53,10 +53,10 @@ func (s *s3BucketStorer) Get(ctx context.Context, rctx domain.RequestContext, a 
 	return data, nil
 }
 
-func (s *s3BucketStorer) Put(ctx context.Context, rctx domain.RequestContext, a attachment.Attachment, data []byte) error {
+func (s *s3BucketStorer) Put(ctx context.Context, rctx domain.RequestContext, a attachment.Attachment, data []byte) (string, error) {
 	md5Builder := md5.New()
 	if _, err := md5Builder.Write(data); err != nil {
-		return err
+		return "", err
 	}
 	md5 := base64.StdEncoding.EncodeToString(md5Builder.Sum(nil))
 	filepath := attachmentS3Path(a)
@@ -67,19 +67,20 @@ func (s *s3BucketStorer) Put(ctx context.Context, rctx domain.RequestContext, a 
 		Key:        &filepath,
 		ContentMD5: &md5,
 	}); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return md5, nil
 }
 
-func (s *s3BucketStorer) PutNoContext(a attachment.Attachment, data []byte) error {
+func (s *s3BucketStorer) PutNoContext(a attachment.Attachment, data []byte) (string, error) {
 	md5Builder := md5.New()
 	if _, err := md5Builder.Write(data); err != nil {
-		return err
+		return "", err
 	}
 	md5 := base64.StdEncoding.EncodeToString(md5Builder.Sum(nil))
 	filepath := attachmentS3Path(a)
+	a.MD5 = md5
 
 	if _, err := s.S3.PutObject(&s3.PutObjectInput{
 		Bucket:     &s.Bucket,
@@ -87,10 +88,10 @@ func (s *s3BucketStorer) PutNoContext(a attachment.Attachment, data []byte) erro
 		Key:        &filepath,
 		ContentMD5: &md5,
 	}); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return md5, nil
 }
 
 func S3Storer(bucket string) (ObjectStorer, error) {

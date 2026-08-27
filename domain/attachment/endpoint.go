@@ -235,6 +235,81 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, a)
 }
 
+// Query is an end-point that returns all attachments matching the query string
+// BE CAREFUL since there are no guards on this (i.e. you can view the metadata on any attachments).
+func (h *Handler) Query(w http.ResponseWriter, r *http.Request) {
+	method := "attachment.QueryAttachment"
+	ctx := domain.GetRequestContext(r)
+
+	q := r.URL.Query()
+	md5, ok := q["md5[]"]
+	if !ok || len(md5) == 0 {
+		response.WriteMissingDataError(w, method, "md5")
+		return
+	}
+
+	ax, err := h.Store.Attachment.ByMD5(ctx, md5)
+	if err != nil {
+		h.Runtime.Log.Error("query attachments", err)
+		response.WriteServerError(w, method, err)
+		return
+	}
+	if ax == nil {
+		ax = []attachment.Attachment{}
+	}
+
+	response.WriteJSON(w, ax)
+}
+
+// Update is an endpoint that updates only the data and data-related fields of a document attachment.
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
+	method := "attachment.UpdateAttachment"
+
+	ctx := domain.GetRequestContext(r)
+
+	attachmentID := request.Param(r, "attachmentID")
+	if len(attachmentID) == 0 {
+		response.WriteMissingDataError(w, method, "attachmentID")
+		return
+	}
+
+	filedata, _, err := r.FormFile("attachment")
+	if err != nil {
+		response.WriteMissingDataError(w, method, "attachment")
+		return
+	}
+
+	a, err := h.Store.Attachment.GetAttachmentMeta(ctx, ctx.OrgID, attachmentID)
+	if err != nil {
+		h.Runtime.Log.Error("could not find", err)
+		response.WriteNotFoundError(w, method, attachmentID)
+		return
+	}
+
+	if !permission.CanChangeDocument(ctx, *h.Store, a.DocumentID) {
+		response.WriteForbiddenError(w)
+		return
+	}
+
+	b := new(bytes.Buffer)
+	_, err = io.Copy(b, filedata)
+	if err != nil {
+		response.WriteServerError(w, method, err)
+		h.Runtime.Log.Error("add attachment", err)
+		return
+	}
+
+	a.Data = b.Bytes()
+	err = h.Store.Attachment.UpdateData(ctx, a)
+	if err != nil {
+		h.Runtime.Log.Error("update attachment data", err)
+		response.WriteServerError(w, method, err)
+		return
+	}
+
+	response.WriteEmpty(w)
+}
+
 // Delete is an endpoint that deletes a particular document attachment.
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	method := "attachment.DeleteAttachment"
