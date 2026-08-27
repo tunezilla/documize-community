@@ -3,8 +3,6 @@ name: continuous-integration
 on:
   push:
     branches:
-      - master
-    pull_request:
 
 permissions:
   contents: read
