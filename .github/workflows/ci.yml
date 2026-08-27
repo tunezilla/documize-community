@@ -22,7 +22,8 @@ jobs:
           key: ${{ runner.os }}-static
 
       - name: Populate static/
-        run: rsync -Av core/database/scripts/postgresql/*.sql edition/static/scripts/postgresql/
+        run: |
+          rsync -Av core/database/scripts edition/static/
 
       - uses: actions/setup-go@v7
         with:
