@@ -23,7 +23,7 @@ jobs:
 
       - name: Populate static/
         run: |
-          rsync -Av core/database/scripts edition/static/
+          rsync -av core/database/scripts edition/static/
 
       - uses: actions/setup-go@v7
         with:
