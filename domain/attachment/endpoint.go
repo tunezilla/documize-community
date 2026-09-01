@@ -14,6 +14,7 @@ package attachment
 import (
 	"bytes"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io"
 	"mime"
@@ -48,6 +49,10 @@ type Handler struct {
 
 type uploadResponse struct {
 	Location string `json:"location"`
+}
+
+type queryBody struct {
+	MD5 []string `json:"md5"`
 }
 
 // Download sends requested file to the client/browser.
@@ -240,15 +245,22 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Query(w http.ResponseWriter, r *http.Request) {
 	method := "attachment.QueryAttachment"
 	ctx := domain.GetRequestContext(r)
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		response.WriteBadRequestError(w, method, err.Error())
+		h.Runtime.Log.Error(method, err)
+		return
+	}
+	defer r.Body.Close()
 
-	q := r.URL.Query()
-	md5, ok := q["md5[]"]
-	if !ok || len(md5) == 0 {
+	model := new(queryBody)
+	err = json.Unmarshal(body, &model)
+	if err != nil {
 		response.WriteMissingDataError(w, method, "md5")
 		return
 	}
 
-	ax, err := h.Store.Attachment.ByMD5(ctx, md5)
+	ax, err := h.Store.Attachment.ByMD5(ctx, model.MD5)
 	if err != nil {
 		h.Runtime.Log.Error("query attachments", err)
 		response.WriteServerError(w, method, err)
