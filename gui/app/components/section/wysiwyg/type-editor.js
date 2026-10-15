@@ -50,7 +50,8 @@ export default Component.extend({
 				contextmenu: false,
 				statusbar: false,
 				inline: false,
-				paste_data_images: false,
+				paste_data_images: true,
+                automatic_uploads: true,
                 images_upload_handler: (blobInfo, success, failure) => {
                     this.get('documentService')
                         .addAttachment(this.get('document.id'), this.get('page.id'), blobInfo)
