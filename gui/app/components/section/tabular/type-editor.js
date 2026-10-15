@@ -71,7 +71,8 @@ export default Component.extend(Modals, Notifier, {
 				browser_spellcheck: true,
 				statusbar: false,
 				inline: true,
-				paste_data_images: false,
+				paste_data_images: true,
+                automatic_uploads: true,
                 images_upload_handler: (blobInfo, success, failure) => {
                     this.get('documentService')
                         .addAttachment(this.get('document.id'), this.get('page.id'), blobInfo)
